@@ -1,0 +1,340 @@
+CREATE DATABASE WWP;
+USE WWP;
+
+
+-- BUSINESS_ENTITY TABLE
+
+/* all attributes:
+business_entity_id, business_name, email
+phone, address, loyalty_points, country, 
+is_customer, is_winemaker */
+
+CREATE TABLE business_entity(
+	business_entity_id INT AUTO_INCREMENT PRIMARY KEY,
+    business_name VARCHAR(100) NOT NULL,
+    phone VARCHAR(100),
+    address VARCHAR(100),
+    email VARCHAR(100) UNIQUE,
+    is_customer BOOLEAN DEFAULT 0 NOT NULL,
+    is_winemaker BOOLEAN DEFAULT 0 NOT NULL,
+    loyalty_points INT,
+    country VARCHAR(100)
+);
+
+CREATE VIEW customer AS
+SELECT 	business_entity_id, business_name, email
+phone, address, loyalty_points
+FROM business_entity
+WHERE is_customer = 1;
+
+CREATE VIEW winemaker AS
+SELECT 	business_entity_id, business_name, email
+phone, address, country
+FROM business_entity
+WHERE is_winemaker = 1;
+
+-- WINE TABLE
+
+/* all attributes: 
+wine_id, wine_name, country, unit_price, 
+natural_status, fermentation_vessel, harvest_year,
+total_acidity, serving_temperature, tannin_level_mg_L,
+skin_contact_duration_days, carbonation_g_L
+is_whitewine, is_redwine, is_amberwine, is_sparklingwine */
+
+CREATE TABLE wine(
+	wine_id INT AUTO_INCREMENT PRIMARY KEY,
+	wine_name VARCHAR(100),
+    country VARCHAR(100),
+    unit_price DECIMAL(6, 2),
+    natural_status ENUM(
+		'conventional',
+        'sustainable',
+        'organic/bio',
+        'biodynamic',
+        'natural') NOT NULL,
+	fermentation_vessel ENUM(
+    'stainless_steel',
+    'oak_barrel',
+    'wooden_vat',
+    'concrete_tank',
+    'qvevri') NOT NULL,
+    harvest_year INT,
+    is_whitewine BOOLEAN DEFAULT 0 NOT NULL,
+    is_redwine BOOLEAN DEFAULT 0 NOT NULL,
+    is_amberwine BOOLEAN DEFAULT 0 NOT NULL,
+    is_sparklingwine BOOLEAN DEFAULT 0 NOT NULL,
+    total_acidity_g_L INT,
+    serving_temperature_C INT,
+    tannin_level_mg_L INT,
+    skin_contact_duration_days INT,
+    carbonation_g_L INT,
+    notes VARCHAR(400),
+    business_entity_id INT,
+    quantity INT,
+    FOREIGN KEY(business_entity_id) 
+    REFERENCES business_entity(business_entity_id)
+    
+);
+
+CREATE VIEW whitewine AS
+SELECT wine_id, wine_name, country, unit_price, 
+natural_status, fermentation_vessel, harvest_year,
+total_acidity_g_L, serving_temperature_C, quantity
+FROM wine
+WHERE is_whitewine = 1;
+
+CREATE VIEW redwine AS
+SELECT wine_id, wine_name, country, unit_price, 
+natural_status, fermentation_vessel, harvest_year,
+tannin_level_mg_L, quantity
+FROM wine
+WHERE is_redwine = 1;
+
+CREATE VIEW amberwine AS
+SELECT wine_id, wine_name, country, unit_price, 
+natural_status, fermentation_vessel, harvest_year,
+skin_contact_duration_days, quantity
+FROM wine
+WHERE is_amberwine = 1;
+
+CREATE VIEW sparklingwine AS
+SELECT wine_id, wine_name, country, unit_price, 
+natural_status, fermentation_vessel, harvest_year,
+carbonation_g_L, quantity
+FROM wine
+WHERE is_sparklingwine = 1;
+
+-- PAYMENT_TYPE TABLE
+
+/* all attributes:
+payment_type_id, bank, is_card, is_wire */
+
+CREATE TABLE payment_type(
+	payment_type_id INT AUTO_INCREMENT PRIMARY KEY,
+    bank VARCHAR(50),
+    is_card BOOLEAN DEFAULT 0 NOT NULL,
+    is_wire BOOLEAN DEFAULT 0 NOT NULL,
+    CONSTRAINT chk_pay_type CHECK (
+		(is_card = 1 AND is_wire = 0) OR
+        (is_card = 0 AND is_wire = 1)
+    )
+);
+
+CREATE VIEW wire AS
+SELECT payment_type_id, bank
+FROM payment_type
+WHERE is_wire = 1;
+
+CREATE VIEW card AS
+SELECT payment_type_id, bank
+FROM payment_type
+WHERE is_card = 1;
+
+-- ORDER TABLE
+
+/* all attributes:
+order_id, order_date, order_status, 
+expected_delivery_date, is_sale, is_purchase,
+payment_type_id, business_entity_id */
+
+CREATE TABLE orders(
+	order_id INT AUTO_INCREMENT PRIMARY KEY,
+    order_date DATE,
+    order_status ENUM(
+		'placed',
+        'packed',
+        'shipped',
+        'delivered'
+    ) NOT NULL,
+    expected_delivery_date DATE,
+    is_sale BOOLEAN DEFAULT 0 NOT NULL,
+    is_purchase BOOLEAN DEFAULT 0 NOT NULL,
+    CONSTRAINT chk_sale_purchase CHECK(
+		(is_sale = 1 AND is_purchase = 0) OR
+        (is_sale = 0 AND is_purchase = 1)
+    ),
+    payment_type_id INT,
+    FOREIGN KEY (payment_type_id) 
+    REFERENCES payment_type(payment_type_id),
+    business_entity_id INT,
+    FOREIGN KEY (business_entity_id)
+    REFERENCES business_entity(business_entity_id)
+);
+
+-- there is one problem that will be fixed by a trigger, that being
+-- there is no way to check if the referenced business_entity_id is
+-- strictly customer for sale and strictly winemaker for purchase
+-- that is going to be last!
+
+CREATE VIEW sale AS
+SELECT order_id, order_date, order_status, 
+expected_delivery_date, payment_type_id, 
+business_entity_id
+FROM orders
+WHERE is_sale = 1;
+
+CREATE VIEW purchase AS
+SELECT order_id, order_date, order_status, 
+expected_delivery_date, payment_type_id, 
+business_entity_id
+FROM orders
+WHERE is_purchase = 1;
+
+-- ORDER_LINE TABLE
+
+/* all attributes:
+order_line_id, quantity, unit_price,
+wine_id, order_id */
+
+CREATE TABLE order_line(
+	order_line_id INT AUTO_INCREMENT PRIMARY KEY,
+    quantity INT NOT NULL,
+    unit_price DECIMAL(6, 2) NOT NULL,
+    wine_id INT,
+    FOREIGN KEY (wine_id) 
+    REFERENCES wine(wine_id),
+    order_id INT,
+    FOREIGN KEY (order_id)
+    REFERENCES orders(order_id)
+);
+
+-- the next views are gonna differentiate between 
+-- order_line_sale and order_line_purchase through
+-- an inner join checking the order_id in orders table
+-- corresponding to the is_sale or is_purchase attribute
+
+CREATE VIEW order_line_sale AS
+SELECT order_line_id, quantity, unit_price,
+wine_id, ol.order_id
+FROM order_line ol JOIN orders o
+WHERE ol.order_id = o.order_id AND o.is_sale = 1;
+
+CREATE VIEW order_line_purchase AS
+SELECT order_line_id, quantity, unit_price,
+wine_id, ol.order_id
+FROM order_line ol JOIN orders o
+WHERE ol.order_id = o.order_id AND o.is_purchase = 1;
+
+
+
+-- THE TRIGGER
+
+DELIMITER $$
+
+CREATE TRIGGER trg_orders_before_insert
+BEFORE INSERT ON orders
+FOR EACH ROW
+BEGIN
+    DECLARE v_is_customer BOOLEAN;
+    DECLARE v_is_winemaker BOOLEAN;
+
+    SELECT is_customer, is_winemaker
+    INTO v_is_customer, v_is_winemaker
+    FROM business_entity
+    WHERE business_entity_id = NEW.business_entity_id;
+
+    IF v_is_customer IS NULL OR v_is_winemaker IS NULL THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Invalid business_entity_id';
+    END IF;
+
+    IF NEW.is_sale = 1 AND v_is_customer <> 1 THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Sale must reference a customer';
+    END IF;
+
+    IF NEW.is_purchase = 1 AND v_is_winemaker <> 1 THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Purchase must reference a winemaker';
+    END IF;
+END$$
+
+DELIMITER ;
+
+
+
+-- INSERT's
+
+-- BUSINESS ENTITIES
+
+INSERT INTO business_entity (business_name, phone, address, email, is_customer, is_winemaker, loyalty_points, country)
+VALUES
+-- customers
+('Bremen Wine Lovers', '+49 176 1234567', 'Am Wall 1, Bremen', 'info@bremenwines.de', 1, 0, 150, 'Germany'),
+('Vinoteca Milano', '+39 02 9876543', 'Via Dante 5, Milano', 'contact@vinotecamilano.it', 1, 0, 230, 'Italy'),
+
+-- winemakers
+('Kvevri Cellars', '+995 599 112233', 'Rustaveli 12, Tbilisi', 'sales@kvevricellars.ge', 0, 1, NULL, 'Georgia'),
+('Château Lumière', '+33 4 22334455', 'Rue des Vins, Bordeaux', 'export@chateaulumiere.fr', 0, 1, NULL, 'France');
+
+
+-- WINES
+
+INSERT INTO wine (
+    wine_name, country, unit_price, natural_status,
+    fermentation_vessel, harvest_year,
+    is_whitewine, is_redwine, is_amberwine, is_sparklingwine,
+    total_acidity_g_L, serving_temperature_C, tannin_level_mg_L,
+    skin_contact_duration_days, carbonation_g_L,
+    notes, business_entity_id, quantity
+)
+VALUES
+('Rkatsiteli Amber', 'Georgia', 22.50, 'natural', 'qvevri', 2021,
+ 0, 0, 1, 0, 6, 14, 0, 45, 0,
+ 'Deep amber qvevri wine with dried fruit notes', 3, 80),
+
+('Saperavi Reserve', 'Georgia', 29.90, 'biodynamic', 'oak_barrel', 2020,
+ 0, 1, 0, 0, 5, 18, 320, 25, 0,
+ 'Bold, structured red with blackberry and spice', 3, 50),
+
+('Chardonnay Lumière', 'France', 24.00, 'organic/bio', 'oak_barrel', 2022,
+ 1, 0, 0, 0, 7, 12, 0, 0, 0,
+ 'Elegant white with vanilla and citrus', 4, 100),
+
+('Crémant Lumière', 'France', 26.50, 'sustainable', 'stainless_steel', 2022,
+ 0, 0, 0, 1, 6, 8, 0, 0, 7,
+ 'Fine sparkling with creamy texture', 4, 60);
+
+
+-- PAYMENT TYPES
+
+
+INSERT INTO payment_type (bank, is_card, is_wire)
+VALUES
+('Deutsche Bank', 1, 0),
+('BNP Paribas', 0, 1),
+('TBC Bank', 1, 0),
+('Intesa Sanpaolo', 0, 1);
+
+
+-- ORDERS (trigger-safe)
+
+
+-- sales (customers buy wine)
+INSERT INTO orders (order_date, order_status, expected_delivery_date, is_sale, is_purchase, payment_type_id, business_entity_id)
+VALUES
+('2025-09-20', 'placed', '2025-09-25', 1, 0, 1, 1),  -- Bremen Wine Lovers
+('2025-09-22', 'packed', '2025-09-29', 1, 0, 3, 2); -- Vinoteca Milano
+
+-- purchases (you buy from winemakers)
+INSERT INTO orders (order_date, order_status, expected_delivery_date, is_sale, is_purchase, payment_type_id, business_entity_id)
+VALUES
+('2025-08-30', 'delivered', '2025-09-01', 0, 1, 2, 3),  -- from Kvevri Cellars
+('2025-09-02', 'delivered', '2025-09-06', 0, 1, 4, 4); -- from Château Lumière
+
+
+-- ORDER LINES
+
+-- sales (to customers)
+INSERT INTO order_line (quantity, unit_price, wine_id, order_id)
+VALUES
+(10, 24.00, 3, 1),  -- Chardonnay Lumière sold to Bremen Wine Lovers
+(6, 29.90, 2, 2);   -- Saperavi Reserve sold to Vinoteca Milano
+
+-- purchases (from winemakers)
+INSERT INTO order_line (quantity, unit_price, wine_id, order_id)
+VALUES
+(50, 22.50, 1, 3),  -- Bought Rkatsiteli Amber from Kvevri Cellars
+(80, 26.50, 4, 4);  -- Bought Crémant Lumière from Château Lumière
+
