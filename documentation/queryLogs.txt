@@ -1,0 +1,209 @@
+
+mysql> -- Query to how many wines each winemaker has
+mysql> SELECT business_name, COUNT(W.business_entity_id) AS wine_amount
+    -> FROM wine W
+    -> INNER JOIN business_entity BE ON W.business_entity_id = BE.business_entity_id
+    -> GROUP BY BE.business_entity_id, BE.business_name;
++-------------------+-------------+
+| business_name     | wine_amount |
++-------------------+-------------+
+| Kvevri Cellars    |           2 |
+| Château Lumière   |           2 |
++-------------------+-------------+
+2 rows in set (0,01 sec)
+
+mysql> 
+mysql> 
+mysql> -- Query to see which business_entity_id uses which bank
+mysql> SELECT business_name, bank
+    -> FROM business_entity BE
+    -> INNER JOIN orders O ON BE.business_entity_id = O.business_entity_id
+    -> INNER JOIN payment_type P ON O.payment_type_id = P.payment_type_id;
++--------------------+-----------------+
+| business_name      | bank            |
++--------------------+-----------------+
+| Bremen Wine Lovers | Deutsche Bank   |
+| Vinoteca Milano    | TBC Bank        |
+| Kvevri Cellars     | BNP Paribas     |
+| Château Lumière    | Intesa Sanpaolo |
++--------------------+-----------------+
+4 rows in set (0,00 sec)
+
+mysql> 
+mysql> -- Query to select business entity and its orders
+mysql> SELECT 
+    ->     BE.business_name,
+    ->     BE.phone,
+    ->     BE.email,
+    ->     O.order_date,
+    ->     O.order_status,
+    ->     O.expected_delivery_date
+    -> FROM business_entity AS BE
+    -> INNER JOIN orders AS O 
+    ->     ON BE.business_entity_id = O.business_entity_id;
++--------------------+-----------------+---------------------------+------------+--------------+------------------------+
+| business_name      | phone           | email                     | order_date | order_status | expected_delivery_date |
++--------------------+-----------------+---------------------------+------------+--------------+------------------------+
+| Bremen Wine Lovers | +49 176 1234567 | info@bremenwines.de       | 2025-09-20 | placed       | 2025-09-25             |
+| Vinoteca Milano    | +39 02 9876543  | contact@vinotecamilano.it | 2025-09-22 | packed       | 2025-09-29             |
+| Kvevri Cellars     | +995 599 112233 | sales@kvevricellars.ge    | 2025-08-30 | delivered    | 2025-09-01             |
+| Château Lumière    | +33 4 22334455  | export@chateaulumiere.fr  | 2025-09-02 | delivered    | 2025-09-06             |
++--------------------+-----------------+---------------------------+------------+--------------+------------------------+
+4 rows in set (0,00 sec)
+
+mysql> 
+mysql> -- Query to select orders and their payment type details
+mysql> SELECT 
+    ->     O.order_id,
+    ->     O.order_date,
+    ->     PT.bank
+    -> FROM orders AS O 
+    -> INNER JOIN payment_type AS PT 
+    ->     ON O.payment_type_id = PT.payment_type_id
+    -> WHERE O.payment_type_id = PT.payment_type_id;
++----------+------------+-----------------+
+| order_id | order_date | bank            |
++----------+------------+-----------------+
+|        1 | 2025-09-20 | Deutsche Bank   |
+|        2 | 2025-09-22 | TBC Bank        |
+|        3 | 2025-08-30 | BNP Paribas     |
+|        4 | 2025-09-02 | Intesa Sanpaolo |
++----------+------------+-----------------+
+4 rows in set (0,00 sec)
+
+mysql> 
+mysql> 
+mysql> -- Query for all natural wines 
+mysql> SELECT wine_id, wine_name, country, unit_price, 
+    -> natural_status, fermentation_vessel, harvest_year
+    -> FROM wine W
+    -> WHERE natural_status = 'natural'; 
++---------+------------------+---------+------------+----------------+---------------------+--------------+
+| wine_id | wine_name        | country | unit_price | natural_status | fermentation_vessel | harvest_year |
++---------+------------------+---------+------------+----------------+---------------------+--------------+
+|       1 | Rkatsiteli Amber | Georgia |      22.50 | natural        | qvevri              |         2021 |
++---------+------------------+---------+------------+----------------+---------------------+--------------+
+1 row in set (0,00 sec)
+
+mysql> 
+mysql> 
+mysql> -- Displays the name and the price of cheap wines
+mysql> SELECT wine_name, unit_price
+    -> FROM wine
+    -> WHERE unit_price < 25.00;
++---------------------+------------+
+| wine_name           | unit_price |
++---------------------+------------+
+| Rkatsiteli Amber    |      22.50 |
+| Chardonnay Lumière  |      24.00 |
++---------------------+------------+
+2 rows in set (0,00 sec)
+
+mysql> 
+mysql> -- Query for how many cheap wines are in the database
+mysql> SELECT COUNT(unit_price) AS cheap_wines 
+    -> FROM wine 
+    -> WHERE unit_price < 25.00;
++-------------+
+| cheap_wines |
++-------------+
+|           2 |
++-------------+
+1 row in set (0,00 sec)
+
+mysql> 
+mysql> 
+mysql> -- Query for Winemakers and their wines
+mysql> SELECT 
+    ->     BE.business_name AS winemaker_name,
+    ->     W.wine_name,
+    ->     W.unit_price
+    -> FROM business_entity AS BE
+    -> INNER JOIN wine AS W 
+    ->     ON BE.business_entity_id = W.business_entity_id
+    -> ;
++-------------------+---------------------+------------+
+| winemaker_name    | wine_name           | unit_price |
++-------------------+---------------------+------------+
+| Kvevri Cellars    | Rkatsiteli Amber    |      22.50 |
+| Kvevri Cellars    | Saperavi Reserve    |      29.90 |
+| Château Lumière   | Chardonnay Lumière  |      24.00 |
+| Château Lumière   | Crémant Lumière     |      26.50 |
++-------------------+---------------------+------------+
+4 rows in set (0,00 sec)
+
+mysql> 
+mysql> -- Query for Quantity of each wine sold
+mysql> SELECT 
+    ->     W.wine_name,
+    ->     SUM(OL.quantity) AS total_quantity_sold
+    -> FROM wine AS W
+    -> INNER JOIN order_line AS OL 
+    ->     ON W.wine_id = OL.wine_id
+    -> INNER JOIN orders AS O 
+    ->     ON OL.order_id = O.order_id
+    -> WHERE O.is_sale = 1
+    -> GROUP BY W.wine_name
+    -> ORDER BY total_quantity_sold DESC;
++---------------------+---------------------+
+| wine_name           | total_quantity_sold |
++---------------------+---------------------+
+| Chardonnay Lumière  |                  10 |
+| Saperavi Reserve    |                   6 |
++---------------------+---------------------+
+2 rows in set (0,00 sec)
+
+mysql> 
+mysql> -- Query for total expenditure by winemaker
+mysql> SELECT 
+    ->     BE.business_name AS winemaker_name,
+    ->     SUM(OL.quantity * OL.unit_price) AS total_expenditure
+    -> FROM business_entity AS BE
+    ->     INNER JOIN wine AS W 
+    ->         ON BE.business_entity_id = W.business_entity_id
+    ->     INNER JOIN order_line AS OL 
+    ->         ON W.wine_id = OL.wine_id
+    ->     INNER JOIN orders AS O 
+    ->         ON OL.order_id = O.order_id
+    -> WHERE O.is_purchase = 1
+    -> GROUP BY BE.business_name
+    -> ORDER BY total_expenditure DESC;
++-------------------+-------------------+
+| winemaker_name    | total_expenditure |
++-------------------+-------------------+
+| Château Lumière   |           2120.00 |
+| Kvevri Cellars    |           1125.00 |
++-------------------+-------------------+
+2 rows in set (0,00 sec)
+
+mysql> 
+mysql> -- Query for total revenue from customer
+mysql> SELECT 
+    -> BE.business_name AS customer_name,
+    ->     SUM(OL.quantity * OL.unit_price) AS total_revenue
+    -> FROM business_entity AS BE
+    -> INNER JOIN orders AS O ON BE.business_entity_id = O.business_entity_id
+    -> INNER JOIN order_line AS OL on O.order_id = OL.order_id
+    -> WHERE O.is_sale = 1
+    -> GROUP BY BE.business_name
+    -> ORDER BY total_revenue DESC;
++--------------------+---------------+
+| customer_name      | total_revenue |
++--------------------+---------------+
+| Bremen Wine Lovers |        240.00 |
+| Vinoteca Milano    |        179.40 |
++--------------------+---------------+
+2 rows in set (0,00 sec)
+
+mysql> 
+mysql> -- Query for selecting all qvevri wines
+mysql> SELECT wine_id, wine_name, unit_price, natural_status, harvest_year
+    -> FROM wine
+    -> WHERE fermentation_vessel = "qvevri";
++---------+------------------+------------+----------------+--------------+
+| wine_id | wine_name        | unit_price | natural_status | harvest_year |
++---------+------------------+------------+----------------+--------------+
+|       1 | Rkatsiteli Amber |      22.50 | natural        |         2021 |
++---------+------------------+------------+----------------+--------------+
+1 row in set (0,00 sec)
+
