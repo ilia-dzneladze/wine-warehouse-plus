@@ -1,7 +1,6 @@
 .colors{
     color: #54422b;
     color: #511f1d;
-    color: #511f1d;
     color: #f8c67d;
     color: #5f4839;
 }
@@ -9,6 +8,8 @@
 *{
     padding: 0;
     margin: 0;
+    font-family: 'Melodrama', serif;
+    font-weight: 900;
 }
 
 header{
@@ -51,4 +52,128 @@ header .headerContainer .navigator{
 
 header .headerContainer .navigator a{
     font-size:24px;
+}
+
+.hero-section{
+    background-image: url(https://files.123freevectors.com/wp-content/solidbackground/skin-tone-free-solidcolor-background.jpg);
+    width: 100%;
+    height: 80vh;
+    background-repeat: no-repeat;
+    background-size: cover;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+}
+
+.hero-section h1{
+    font-size: 64px;
+    width: 400px;
+}
+
+.hero-section p{
+    font-family: 'Clash Grotesk', sans-serif;
+    font-size: 20px;
+    width: 309px;
+    padding: 30px 0px;
+}
+
+.hero-section button{
+    font-family: 'Clash Grotesk', sans-serif;
+    font-size: 15px;
+    color: #fff;
+    width: 135px;
+    height: 65px;
+    border-radius: 20px 20px;
+    background-color: #511f1d;
+}
+
+main {
+    max-width: 1400px;
+    margin: 50px auto;
+    padding: 30px;
+    background-color: #f3e7ca;
+    border-radius: 10px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+    font-family: 'Tinos', serif;
+}
+
+/* Sections inside main */
+main section {
+    margin-bottom: 50px;
+}
+
+/* Small headers (section titles) */
+main h2 {
+    color: #511f1d;
+    margin-bottom: 5px;
+    font-size: 3.0em;
+}
+
+/* Paragraphs */
+main p {
+    font-family: 'Clash Grotesk', sans-serif;
+    font-size: 2.0em;
+    line-height: 2.0;
+    color: #54422b;
+    margin-bottom: 15px;
+}
+
+/* Buttons inside main */
+main button {
+    background-color: #511f1d;
+    color: #f8c67d;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-family: 'Clash Grotesk', sans-serif;
+    font-size: 1em;
+    transition: background-color 0.5s ease;
+}
+
+main button:hover {
+    background-color: #5f4839;
+}
+
+/* Links inside main \ */
+main a {
+    color: #511f1d;
+    text-decoration: none;
+}
+
+main a:hover {
+    text-decoration: underline;
+    color: #5f4839;
+}
+
+#footer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 20px; 
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 100px;
+  background-color: #511f1d;
+}
+
+.footer-logo {
+  height: 100px;
+  width: auto;
+}
+
+#footer a {
+  font-family: 'Clash Grotesk', sans-serif;
+  font-size: 1.3em;
+  color: white;
+  text-decoration: none;
+  background-color: #00000023;
+  padding: 10px 25px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+#footer a:hover{
+    background-color: #30100f;
 }
