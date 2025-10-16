@@ -1,0 +1,54 @@
+.colors{
+    color: #54422b;
+    color: #511f1d;
+    color: #511f1d;
+    color: #f8c67d;
+    color: #5f4839;
+}
+
+*{
+    padding: 0;
+    margin: 0;
+}
+
+header{
+    width: 100%;
+    height: 60px;
+    background-color: #511f1d;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+}
+
+header .headerContainer{
+    width: 85%;
+    color: white;
+    font-family: 'Melodrama', serif;
+    font-weight: 900;
+    display: flex;
+    flex-direction: row;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+header .headerContainer a{
+    text-decoration: none;
+    color: white;
+}
+
+header .headerContainer h1{
+    font-size: 32px;
+}
+
+header .headerContainer .navigator{
+    width: 40%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+}
+
+header .headerContainer .navigator a{
+    font-size:24px;
+}
