@@ -1,0 +1,101 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Clash Grotesk', sans-serif;
+  background-color: #fef9f3;
+  color: #54422b;
+}
+
+.center-page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 80vh;
+}
+
+.form-card {
+  background: #fff8ef;
+  padding: 40px;
+  border-radius: 15px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  text-align: center;
+  width: 100%;
+  max-width: 800px;
+}
+
+.form-card h2 {
+  margin-bottom: 15px;
+  color: #511f1d;
+}
+
+.form-card p {
+  margin-bottom: 15px;
+}
+
+input, select {
+  width: 70%;
+  padding: 10px 15px;
+  margin: 10px 0;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 1em;
+}
+
+button {
+  background-color: #511f1d;
+  color: #f8c67d;
+  border: none;
+  padding: 12px 25px;
+  border-radius: 8px;
+  font-size: 1em;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: 0.3s;
+}
+
+button:hover {
+  background-color: #f8c67d;
+  color: #511f1d;
+}
+
+.result-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+.result-table th, .result-table td {
+  border: 1px solid #ccc;
+  padding: 10px;
+  font-size: 0.95em;
+}
+
+.result-table th {
+  background-color: #511f1d;
+  color: #f8c67d;
+}
+
+.result-table tr:nth-child(even) {
+  background-color: #f3e7ca;
+}
+
+.back-btn {
+  display: inline-block;
+  margin: 20px 10px 0;
+  padding: 10px 20px;
+  background-color: #511f1d;
+  color: #f8c67d;
+  text-decoration: none;
+  border-radius: 5px;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
+}
+
+.back-btn:hover {
+  background-color: #f8c67d;
+  color: #511f1d;
+}

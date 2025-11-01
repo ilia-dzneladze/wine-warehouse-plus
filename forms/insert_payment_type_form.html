@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Add New Payment Type</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f3f4f6;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        form {
+            background: white;
+            padding: 30px 40px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            width: 350px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        h2 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 25px;
+        }
+
+        label {
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        input, select {
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+
+        input[type="submit"] {
+            background: #007bff;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+        }
+
+        input[type="submit"]:hover {
+            background: #916719;
+        }
+
+        a {
+            text-align: center;
+            margin-top: 10px;
+            text-decoration: none;
+            color: #007bff;
+        }
+    </style>
+</head>
+<body>
+
+    <form action="insert_payment_type.php" method="post">
+        <h2>Add New Payment Type</h2>
+
+        <label for="bank">Bank Name:</label>
+        <input type="text" id="bank" name="bank" placeholder="Enter bank name" required>
+
+        <label for="method">Payment Method:</label>
+        <select id="method" name="method" required>
+            <option value="">-- Select Method --</option>
+            <option value="Card">Card</option>
+            <option value="Wire">Wire</option>
+        </select>
+
+        <input type="submit" value="Add Payment Type">
+        <a href="../main.html">Back to Payment Types</a>
+    </form>
+
+</body>
+</html>
